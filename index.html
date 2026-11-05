@@ -1843,7 +1843,7 @@ body.bkon .topo-dir .chip,body.bkon .topo-dir>span,body.bkon .salvabar{display:n
       <div><label>Rule Dice from</label><input id="bfD0" placeholder="0" oninput="bkFiltra()"></div>
       <div><label>to</label><input id="bfD1" placeholder="1" oninput="bkFiltra()"></div>
       <div><label>Image</label><input id="bfId" style="width:130px" placeholder="ISIC_…" oninput="bkFiltra()"></div>
-      <div><label>Attention level <a href="#" onclick="bkAjudaRev();return false" title="what is this" style="color:var(--verde);font-weight:800">?</a></label><select id="bfRev" onchange="bkFiltra()"><option value="">all</option><option value="vermelho">🔴 refused</option><option value="laranja">🟠 flagged</option><option value="amarelo">🟡 confident, unusual measurement</option><option value="verde">🟢 confident, usual</option><option value="azul">🔵 pre-step rule</option></select></div>
+      <div><label>Attention level <a href="#" onclick="bkAjudaRev();return false" title="Attention level: 🔴 refused (no contour); 🟠 flagged (second attempt, route 1/2); 🟡 confident with unusual measurement (asymmetry at or above 16.7% or border irregularity at or above 1.995 × circle, the 90th percentile among core confident images of this run); 🟢 confident, usual; 🔵 contour by pre-step rule. Attention level orders review; it is not a diagnosis." style="color:var(--verde);font-weight:800">?</a></label><select id="bfRev" onchange="bkFiltra()"><option value="">all</option><option value="vermelho">🔴 refused</option><option value="laranja">🟠 flagged</option><option value="amarelo">🟡 confident, unusual measurement</option><option value="verde">🟢 confident, usual</option><option value="azul">🔵 pre-step rule</option></select></div>
       <div><label>Sort by</label><select id="bfOrd" onchange="bkFiltra()"><option value="id">image number</option><option value="rev">attention level</option><option value="tam">size (rule contour area)</option><option value="est">state</option><option value="dice">rule Dice (lowest first)</option><option value="cam">engine path (most work first)</option></select></div>
       <div><button class="bkbtn" id="bkBtnAgrupa" style="border:1.5px solid var(--linha)" onclick="bkAgrupa()">Group by attention level</button></div>
       <div><button class="bkbtn" style="border:1.5px solid var(--linha)" onclick="bkLimpaF()">clear filters</button></div>
@@ -1950,13 +1950,14 @@ function bkContaFilas(){
 function bkAbaFila(a){ BK.aba=a; document.getElementById('bfOrd').value=(a==='alaudar'?'rev':'id'); bkContaFilas(); bkFiltra(); }
 function bkAjudaRev(){ var d=document.getElementById('bkAjudaRev'), R=BK.J.revisao||{};
   if(d.style.display===''){ d.style.display='none'; return; }
-  d.innerHTML='<b>Attention level</b> — a colour taken from the rule\'s output, not a diagnosis:<br>'+
-   '<span class="bkdot rv-vermelho"></span><b>refused</b>: the rule drew no contour; a new photo is requested.<br>'+
-   '<span class="bkdot rv-laranja"></span><b>flagged</b>: the contour came from the second attempt and is shown with a warning.<br>'+
-   '<span class="bkdot rv-amarelo"></span><b>confident, unusual measurement</b>: asymmetry ≥ '+String(R.p90_assimetria)+'% or border irregularity ≥ '+String(R.p90_irregularidade)+' (90th percentile among core confident images).<br>'+
+  d.innerHTML='<b>Attention level</b> — taken from the rule\'s output:<br>'+
+   '<span class="bkdot rv-vermelho"></span><b>refused</b> (no contour).<br>'+
+   '<span class="bkdot rv-laranja"></span><b>flagged</b> (second attempt, route 1/2).<br>'+
+   '<span class="bkdot rv-amarelo"></span><b>confident with unusual measurement</b> (asymmetry at or above '+String(R.p90_assimetria)+'% or border irregularity at or above '+String(R.p90_irregularidade)+' × circle, the 90th percentile among core confident images of this run).<br>'+
    '<span class="bkdot rv-verde"></span><b>confident, usual</b>.<br>'+
-   '<span class="bkdot rv-azul"></span><b>pre-step rule</b>: contour drawn by a pre-step rule (2 or 3).<br>'+
-   '<span style="color:var(--tinta3)">Asymmetry and irregularity are measured on the rule contour (an image description). In the “To report” tab the list comes in this order.</span>';
+   '<span class="bkdot rv-azul"></span><b>contour by pre-step rule</b>.<br>'+
+   '<span style="color:var(--tinta3)">Asymmetry and irregularity are measured on the rule contour (an image description). In the “To report” tab the list comes in this order.</span><br>'+
+   '<b>Attention level orders review; it is not a diagnosis.</b>';
   d.style.display=''; }
 function bkFiltra(){
   var g=function(i){ return document.getElementById(i).value; };
@@ -2156,6 +2157,7 @@ function bkMontaEst(){
 }
 function bkMontaSobre(){
   var J=BK.J, pr=J.pre_registro||{}, h='<div class="card bkabout"><h3>About this run</h3>';
+  h+='<p>This is the research version of the physician panel, built so that reviewers can see the article’s run inside the tool. Several items here come from the study and do not exist in the clinical version: the Dice against the IMA++ reference, any value derived from that reference, the example work queues and the fictitious reports. In clinical use the physician sees only what the rule produces for the patient’s photo — contour, cause, measurements and the queue — and nothing is scored against a reference, because there is none.</p>';
   h+='<p><b>What this is.</b> The frozen v1.10 rule engine drew the lesion contour on 2,197 dermoscopic images from the IMA++ set (ISIC Archive) that it had never seen during development. Each contour was compared with the IMA++ reference mask using the Dice coefficient.</p>';
   h+='<p><b>Sealed beforehand.</b> Protocol, image list, predictions and script hashes were deposited before the run: pre-registration <a href="https://doi.org/'+bkEsc(pr.doi)+'" target="_blank" rel="noopener">'+bkEsc(pr.doi)+'</a> (all versions: <a href="https://doi.org/'+bkEsc(pr.conceito)+'" target="_blank" rel="noopener">'+bkEsc(pr.conceito)+'</a>). The result was opened once.</p>';
   h+='<p><b>Three states.</b> <span class="bkest bk-confiante">confident</span> the rule drew the contour and stands by it. <span class="bkest bk-n1">flagged</span> the core refused and a second attempt (route 1 or route 2) drew a contour, shown with a warning; it counts 0 in the primary. <span class="bkest bk-recusa">refused</span> no route drew a contour, and the cause is recorded; in the app this requests a new photo.</p>';
