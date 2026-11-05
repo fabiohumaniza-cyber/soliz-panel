@@ -2212,6 +2212,7 @@ function bkAvisaEnf(id){ var x=BK.porId[id], msg=bkMsgEnf(x);
   bkHist(id,'Nursing alerted ('+(bkFilaDe(x).f==='atraso'?'2nd image overdue':'active search')+')',t);
   bkFiltra(); if(CASO&&CASO.id===id&&document.getElementById('telacaso').className.indexOf('on')>=0) bkCaso(id); }
 function bkAba(a){
+  if(a!=='fila') bkPush({bk:'aba',a:a}); else if(!BK.nav && history.state && history.state.bk==='aba'){ BK.nav=true; history.back(); BK.nav=false; }
   document.getElementById('bkFila').style.display=a==='fila'?'':'none';
   document.getElementById('bkEst').style.display=a==='est'?'':'none';
   document.getElementById('bkSobre').style.display=a==='sobre'?'':'none';
@@ -2342,12 +2343,12 @@ function bkMontaSobre(){
 }
 /* Tela da imagem no modo banco: sem dado de paciente, sem prioridade, sem doenca. */
 var _bkAbrirCaso=abrirCasoFull;
-abrirCasoFull=function(id){ if(!BK.J) return _bkAbrirCaso(id); bkCaso(id); };
+abrirCasoFull=function(id){ if(!BK.J) return _bkAbrirCaso(id); bkCaso(id); bkPush({bk:'caso',id:id}); };
 var _bkVoltar=voltarTag;
-voltarTag=function(){ if(!BK.J) return _bkVoltar(); bkVaiFila(); };
+voltarTag=function(){ if(!BK.J) return _bkVoltar(); if(history.state&&history.state.bk==='caso') history.back(); else bkVaiFila(); };
 var _bkAbrirPincel=abrirPincel;
 abrirPincel=function(id){
-  _bkAbrirPincel(id); if(!BK.J) return;
+  _bkAbrirPincel(id); if(!BK.J) return; bkPush({bk:'tela',id:id}); bkBotaoVoltar();
   var x=BK.porId[id]; if(x){ var E=ed(id); if(!E.nos && !E.tracos) { E.bkIni=false; bkPreCarrega(x); } }
   var im=document.getElementById('ppfoto');
   var redes=function(){ pdim(); try{ gotaPrepara(); }catch(e){} };
@@ -2410,7 +2411,22 @@ function bkDica(){
   d.style.display='';
 }
 var _bkFecharPincel=fecharPincel;
-fecharPincel=function(){ var d=document.getElementById('bkDica'); if(d) d.style.display='none'; bkPaineisFecha(); _bkFecharPincel(); if(BK.J){ bkContaFilas(); bkFiltra(); } };
+function bkFechaTela(){ var d=document.getElementById('bkDica'); if(d) d.style.display='none'; bkPaineisFecha(); BK.nav=true; _bkFecharPincel(); BK.nav=false; if(BK.J){ bkContaFilas(); bkFiltra(); } }
+fecharPincel=function(){ if(BK.J && history.state && history.state.bk==='tela') history.back(); else bkFechaTela(); };
+/* Seta voltar (05/11 13h15): navegador e celular voltam uma tela dentro do painel (tela cheia > lesao > lista; Estatistica/Sobre > Imagens). */
+BK.nav=false;
+function bkPush(st){ if(BK.nav) return; var h=history.state||{}; if(h.bk===st.bk && h.id===st.id && h.a===st.a) return; try{ history.pushState(st,''); }catch(e){} }
+function bkBotaoVoltar(){ var b=document.getElementById('bkVoltarTela'); if(b) return;
+  var bar=document.querySelector('#telap .pbar'); if(!bar) return; b=document.createElement('button'); b.id='bkVoltarTela'; b.textContent='← back';
+  b.style.cssText='background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:7px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;margin-right:12px';
+  b.onclick=function(){ fecharPincel(); }; bar.insertBefore(b,bar.firstChild); }
+window.addEventListener('popstate',function(e){ if(!BK.J) return; var st=e.state||{bk:'lista'}; BK.nav=true;
+  try{ var telaOn=document.getElementById('telap').className.indexOf('on')>=0;
+    if(st.bk==='tela'){ if(!telaOn) abrirPincel(st.id); }
+    else { if(telaOn) bkFechaTela();
+      if(st.bk==='caso'){ if(!CASO||CASO.id!==st.id||document.getElementById('telacaso').className.indexOf('on')<0) bkCaso(st.id); }
+      else { bkVaiFila(); bkAba(st.bk==='aba'?st.a:'fila'); } }
+  } finally { BK.nav=false; } });
 /* ===== Paineis flutuantes da tela cheia (modo banco, 05/11 11h35) — FICTICIO: nada e enviado, so fica registrado neste navegador.
    Painel "Acoes do medico" (6 acoes + historico do paciente) e janela de chat com o medico que encaminhou.
    Os dois se arrastam pela barra de cima para onde o medico quiser; a posicao fica guardada. ===== */
@@ -2572,6 +2588,7 @@ function bkCaso(id){
 }
 /* Abre direto no modo banco. Num servidor busca o JSON sozinho; aberto como arquivo local o navegador bloqueia,
    e o botao "Abrir JSON da rodada" carrega o arquivo. */
+try{ if(!BK_DEMO) history.replaceState({bk:'lista'},''); }catch(e){}
 if(!BK_DEMO){
   document.getElementById('home').className='wrap off';
   document.getElementById('bkCarregando').style.display='';
