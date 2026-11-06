@@ -2164,7 +2164,7 @@ function bkMontaSobre(){
   h+='<p><b>What is not here.</b> The engine code, the rule names and the IMA++ reference contour. Photos come from the public ISIC Archive (all CC-0); nothing is hosted here besides this page and the run data.</p>';
   h+='<p><b>Integrity.</b> Engine file set <code>'+bkEsc((J.motor||{}).hash_conjunto)+'</code>. Sealed result:</p><ul>'+
      (J.origem||[]).map(function(o){return '<li><code>'+bkEsc(o.arquivo)+'</code> <code>'+bkEsc(o.sha256)+'</code></li>';}).join('')+'</ul>';
-  h+='<p><b>Your adjustments.</b> You can open any image full screen and move the contour nodes. This stays in your browser only and does not change the run numbers.</p></div>';
+  h+='<p><b>Your adjustments.</b> You can open any image full screen and move the contour nodes. This stays in your browser only and does not change the run numbers.</p><p><b>Visits.</b> This page counts anonymous visits (GoatCounter: no cookies, no personal data).</p></div>';
   document.getElementById('bkSobre').innerHTML=h;
 }
 /* Tela da imagem no modo banco: sem dado de paciente, sem prioridade, sem doenca. */
@@ -2480,5 +2480,6 @@ if(!BK_DEMO){
   document.addEventListener('touchend',solta,true);
 })();
 </script>
+<script data-goatcounter="https://fabiohumaniza.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>
