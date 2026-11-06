@@ -2442,5 +2442,43 @@ if(!BK_DEMO){
 }
 </script>
 
+<style>
+@media(max-width:760px){
+  .gota{min-width:0;max-width:64%;padding:6px 8px;font-size:11px;background:rgba(20,19,17,.72);left:8px;top:8px;right:auto;bottom:auto}
+  .gota .lin{display:none}
+  .gota .amostra{height:12px;margin-bottom:4px}
+  .gota .barra{margin-top:4px}
+  .gota .diag{margin-top:5px;padding:3px 5px;font-size:11px}
+  .gota[data-lado~="d"]{left:auto;right:8px}
+  .gota[data-lado~="b"]{top:auto;bottom:8px}
+  .pzhud{left:auto;right:8px;bottom:auto;top:8px;padding:3px 5px;gap:4px;transition:opacity .15s}
+  .pzhud button{padding:3px 7px;font-size:11px}
+  .pzhud span{min-width:34px;font-size:11px}
+  .pzoom.toque .pzhud{opacity:0;pointer-events:none}
+  .pzoom:not(.toque) .gota{display:none}
+}
+</style>
+<script>
+(function(){
+  var mq=window.matchMedia?window.matchMedia('(max-width:760px)'):null;
+  function cel(){ return !!(mq&&mq.matches); }
+  function lado(e){
+    if(!cel()) return;
+    var z=document.getElementById('pzoom'), g=document.getElementById('gota'); if(!z||!g) return;
+    var r=z.getBoundingClientRect(); if(!r.width||!r.height) return;
+    var p=(e.touches&&e.touches[0])?e.touches[0]:e;
+    var fx=(p.clientX-r.left)/r.width, fy=(p.clientY-r.top)/r.height;
+    g.setAttribute('data-lado',(fx<0.5?'d':'e')+' '+(fy<0.5?'b':'c'));
+  }
+  function liga(e){ if(!cel()) return; var z=document.getElementById('pzoom'); if(z) z.classList.add('toque'); lado(e); }
+  function solta(){ var z=document.getElementById('pzoom'); if(z) z.classList.remove('toque'); }
+  document.addEventListener('pointerdown',function(e){ var z=document.getElementById('pzoom'); if(z&&z.contains(e.target)&&!(e.target.closest&&e.target.closest('.pzhud'))) liga(e); },true);
+  document.addEventListener('pointermove',function(e){ var z=document.getElementById('pzoom'); if(z&&z.classList.contains('toque')) lado(e); },true);
+  document.addEventListener('touchmove',function(e){ var z=document.getElementById('pzoom'); if(z&&z.classList.contains('toque')) lado(e); },{capture:true,passive:true});
+  document.addEventListener('pointerup',solta,true);
+  document.addEventListener('pointercancel',solta,true);
+  document.addEventListener('touchend',solta,true);
+})();
+</script>
 </body>
 </html>
